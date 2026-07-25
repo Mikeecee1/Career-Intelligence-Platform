@@ -3,7 +3,7 @@
 import pandas as pd
 
 
-def generate_report(df: pd.DataFrame) -> None:
+def generate_profile(df: pd.DataFrame) -> None:
     """
     Generate a summary report for the raw NHS jobs dataset.
 

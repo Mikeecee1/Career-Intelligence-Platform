@@ -1,6 +1,7 @@
-# NHS Career Intelligence Platform
+#  Career Intelligence Platform
 
-> The NHS Career Intelligence Platform is a cloud-native data engineering solution that transforms NHS recruitment data into an intelligent career knowledge base. Built using AWS S3, Databricks, MongoDB and Python, the platform supports workforce analytics today while providing a foundation for future semantic search and AI-powered career guidance.
+> The Career Intelligence Platform is a cloud-native, modular data engineering platform for ingesting, profiling, transforming and analysing recruitment data. The platform is designed to support multiple recruitment datasets through a reusable ETL architecture. [The NHS Jobs dataset](https://www.kaggle.com/datasets/homelesssandwich/nhs-jobs?resource=download) is used as the initial implementation to validate the design.
+
 
 
 ---

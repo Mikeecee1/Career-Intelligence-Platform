@@ -1,10 +1,10 @@
-"""Application entry point for the NHS Career Intelligence Platform."""
+"""Application entry point for the Career Intelligence Platform."""
 
 from config import RAW_DATA
 
 from src.extract.csv_loader import load_data
-from src.transform.reports import generate_report
-from src.transform.clean import clean_data
+from src.profile.reports import generate_profile
+from clean.clean import clean_data
 
 
 def main() -> None:
@@ -20,7 +20,7 @@ def main() -> None:
     print("✓ Dataset loaded successfully.")
 
     print("\nGenerating data profile...")
-    generate_report(df)
+    generate_profile(df)
 
     choice = input("\nApply cleaning suggestions? (Y/N): ").strip().lower()
 
@@ -31,7 +31,7 @@ def main() -> None:
         print("✓ Cleaning complete.")
 
         print("\nUpdated data profile...")
-        generate_report(df)
+        generate_profile(df)
 
     print("\nProcess complete.")
 
