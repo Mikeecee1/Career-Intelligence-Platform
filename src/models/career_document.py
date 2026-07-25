@@ -1,3 +1,10 @@
+"""
+Canonical Career Intelligence document.
+
+All recruitment datasets are mapped into this structure before
+being stored in MongoDB.
+"""
+
 CAREER_DOCUMENT = {
     "job": {
         "id": None,
