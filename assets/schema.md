@@ -1,34 +1,45 @@
 # Schemas
 
 **Outline of schemas used to plan document models**
+job
+│
+├── title
+├── reference
+├── description
+├── grade
+├── specialty
 
-jobs
+organisation
 │
-├── job
-│   ├── title
-│   ├── reference
-│   ├── description
-│   └── specialty
+├── name
+├── department
+
+employment
 │
-├── organisation
-│   ├── name
-│   ├── department
-│   └── postcode
+├── contract_type
+├── working_pattern
+├── salary
+│     ├── minimum
+│     ├── maximum
+│     ├── currency
+
+location
 │
-├── employment
-│   ├── type
-│   ├── working_pattern
-│   ├── salary
-│   └── pay_band
+├── town
+├── postcode
+├── region
+
+dates
 │
-├── location
-│   ├── town
-│   ├── postcode
-│   ├── latitude
-│   └── longitude
+├── published
+├── closing
+
+metadata
 │
-├── dates
+├── source
+├── imported_at
+
+ai
 │
-├── metadata
-│
-└── ai
+├── skills
+├── embedding
