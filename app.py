@@ -4,14 +4,19 @@ from config import RAW_DATA
 
 from src.extract.csv_loader import load_data
 from src.profile.reports import generate_profile
-from clean.clean import clean_data
+from src.clean.clean import clean_data
+from src.transform.mapper import build_documents
+from src.validation.validator import (
+    validate_documents,
+    get_valid_documents,
+)
 
 
 def main() -> None:
     """Application entry point."""
 
     print("\n" + "=" * 60)
-    print("NHS CAREER INTELLIGENCE PLATFORM")
+    print("CAREER INTELLIGENCE PLATFORM")
     print("=" * 60)
 
     print("\nLoading dataset...")
@@ -34,6 +39,39 @@ def main() -> None:
         generate_profile(df)
 
     print("\nProcess complete.")
+
+    #test to see if the columns are being read in correctly
+    #print(df.columns.tolist())
+
+    print("\nMapping Career Intelligence documents...")
+    documents = build_documents(df)
+
+    print(f"✓ Created {len(documents)} documents.")
+
+    print("\nValidating documents...")
+    validation_results = validate_documents(documents)
+
+    valid_documents = get_valid_documents(documents)
+
+    print(f"✓ Valid documents : {len(valid_documents)}")
+    print(f"✗ Invalid documents: {len(documents) - len(valid_documents)}")
+
+    invalid = [
+    result
+    for result in validation_results
+    if not result["valid"]
+    ]
+
+    if invalid:
+
+        print("\nValidation errors:\n")
+
+        for result in invalid[:5]:
+
+            print(f"Document {result['index']}")
+
+            for error in result["errors"]:
+                print(f"  - {error}")
 
 
 if __name__ == "__main__":

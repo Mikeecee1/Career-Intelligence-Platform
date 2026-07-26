@@ -1,58 +1,56 @@
 
 
-
 def build_job_document(row: dict) -> dict:
     """
-    Map a row of data to a job document.
-
-    Args:
-        row (dict): A dictionary representing a row of data.
-
-    Returns:
-        dict: A dictionary representing a job document.
+    Map a cleaned dataset row to a Career Intelligence document.
     """
 
     return {
 
         "job": {
-            "id": row.get("id"),
+            "id": row.get("job_reference"),
             "title": row.get("job_title"),
-            "description": row.get("job_description"),
+            "description": row.get("full_description"),
             "requirements": [],
         },
 
         "organisation": {
-            "name": row.get("organisation"),
+            "name": row.get("employer"),
             "department": row.get("department"),
         },
 
         "employment": {
-            "contract_type": row.get("contract_type"),
+            "contract_type": row.get("job_type"),
+            "working_pattern": row.get("working_pattern"),
             "salary": {
-                "minimum": row.get("salary_from"),
-                "maximum": row.get("salary_to"),
+                "minimum": row.get("json_salary_min"),
+                "maximum": row.get("json_salary_max"),
                 "pay_band": row.get("pay_band"),
+                "pay_scheme": row.get("pay_scheme"),
             },
         },
 
         "location": {
-            "town": row.get("town"),
-            "postcode": row.get("postcode"),
+            "town": row.get("location"),
+            "postcode": row.get("json_address_postcode"),
+            "latitude": row.get("json_lat"),
+            "longitude": row.get("json_lng"),
         },
 
         "dates": {
-            "published": row.get("date_posted"),
-            "closing": row.get("closing_date"),
+            "published": row.get("json_date_posted"),
+            "closing": row.get("json_closing_date"),
         },
 
         "metadata": {
             "source": "NHS Jobs",
+            "scrape_date": row.get("scrape_dt"),
         },
 
         "ai": {
             "skills": [],
             "embedding": None,
-        }
+        },
     }
 
 def build_documents(dataframe) -> list[dict]:
