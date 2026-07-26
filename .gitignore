@@ -41,3 +41,5 @@ logs/*
 # Windows
 Thumbs.db
 
+#Documentation
+README_old.md
