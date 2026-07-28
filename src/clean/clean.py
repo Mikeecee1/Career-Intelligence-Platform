@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from config import CLEANING_OPTIONS
+from src.config import CLEANING_OPTIONS
 
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:

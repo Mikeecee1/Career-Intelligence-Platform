@@ -17,7 +17,7 @@ MONGO_URI: str = get_required_env("MONGO_URI")
 MONGO_DATABASE: str = get_required_env("MONGO_DATABASE")
 MONGO_COLLECTION: str = get_required_env("MONGO_COLLECTION")
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 RAW_DATA = PROJECT_ROOT / "data" / "raw" / "jobs_raw.csv"
 

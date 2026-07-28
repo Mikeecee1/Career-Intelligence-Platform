@@ -1,6 +1,6 @@
 """Application entry point for the Career Intelligence Platform."""
 
-from config import RAW_DATA
+from src.config import RAW_DATA
 
 from src.extract.csv_loader import load_data
 from src.profile.reports import generate_profile
@@ -9,6 +9,10 @@ from src.transform.mapper import build_documents
 from src.validation.validator import (
     validate_documents,
     get_valid_documents,
+)
+from src.database.repository import (
+    insert_documents,
+    count_documents,
 )
 
 
@@ -38,7 +42,6 @@ def main() -> None:
         print("\nUpdated data profile...")
         generate_profile(df)
 
-    print("\nProcess complete.")
 
     #test to see if the columns are being read in correctly
     #print(df.columns.tolist())
@@ -73,6 +76,21 @@ def main() -> None:
             for error in result["errors"]:
                 print(f"  - {error}")
 
+
+    if valid_documents:
+        print("\nTesting MongoDB insertion...")
+
+        test_documents = valid_documents[:5]
+
+        inserted = insert_documents(test_documents)
+
+        print(f"✓ Inserted {inserted} documents.")
+        print(f"✓ Documents currently in MongoDB: {count_documents()}")
+    else:
+        print("\nNo valid documents available for MongoDB insertion.")
+
+    
+    # print("\nProcess complete.")
 
 if __name__ == "__main__":
     main()
