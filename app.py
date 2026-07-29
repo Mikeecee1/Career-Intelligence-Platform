@@ -78,19 +78,19 @@ def main() -> None:
 
 
     if valid_documents:
-        print("\nTesting MongoDB insertion...")
 
-        test_documents = valid_documents[:5]
+        print("\nImporting validated documents into MongoDB...")
 
-        inserted = insert_documents(test_documents)
+        inserted = insert_documents(valid_documents)
 
-        print(f"✓ Inserted {inserted} documents.")
-        print(f"✓ Documents currently in MongoDB: {count_documents()}")
+        print(f"✓ Inserted {inserted} new documents.")
+        print(f"✓ Total documents in MongoDB: {count_documents()}")
+
     else:
-        print("\nNo valid documents available for MongoDB insertion.")
 
+        print("\nNo valid documents available for import.")
     
-    # print("\nProcess complete.")
+    print("\nProcess complete.")
 
 if __name__ == "__main__":
     main()

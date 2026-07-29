@@ -4,6 +4,11 @@ from pymongo.errors import PyMongoError
 
 from src.database.connection import get_collection
 
+
+# Version 1:
+# Documents are considered duplicates if they share the same canonical job.id.
+# Future versions may use AI-assisted matching across multiple data sources.
+# Unused functions are retained for potential future use.
 def document_exists(
     document: dict,
     collection_name: str | None = None,
@@ -12,8 +17,24 @@ def document_exists(
     Return True if the document already exists.
     """
     collection = get_collection(collection_name)
-    return collection.find_one({"job.id": document.get("job", {}).get("id")}) is not None          
-  
+    return collection.find_one({"job.id": document.get("job", {}).get("id")}) is not None     
+     
+#gets ids from the database to check if they already exist in the database
+def get_existing_ids(
+    collection_name: str | None = None,
+) -> set[str]:
+    """
+    Return all existing canonical job IDs.
+    """
+    collection = get_collection(collection_name)
+
+    return {
+        document["job"]["id"]
+        for document in collection.find(
+            {},
+            {"job.id": 1, "_id": 0},
+        )
+    }
 
 def insert_documents(
     documents: list[dict],
@@ -34,16 +55,20 @@ def insert_documents(
         return 0
 
     collection = get_collection(collection_name)
+    existing_ids = get_existing_ids(collection_name)
 
     try:
         inserted = 0
 
         for document in documents:
 
-            if document_exists(document, collection_name):
+            job_id = document.get("job", {}).get("id")
+
+            if job_id in existing_ids:
                 continue
 
             collection.insert_one(document)
+            existing_ids.add(job_id)
             inserted += 1
 
         return inserted
