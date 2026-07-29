@@ -81,9 +81,10 @@ def main() -> None:
 
         print("\nImporting validated documents into MongoDB...")
 
-        inserted = insert_documents(valid_documents)
+        inserted, duplicates = insert_documents(valid_documents)
 
         print(f"✓ Inserted {inserted} new documents.")
+        print(f"✓ Skipped {duplicates} duplicate documents.")
         print(f"✓ Total documents in MongoDB: {count_documents()}")
 
     else:

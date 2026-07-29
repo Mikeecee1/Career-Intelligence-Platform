@@ -19,7 +19,7 @@ def document_exists(
     collection = get_collection(collection_name)
     return collection.find_one({"job.id": document.get("job", {}).get("id")}) is not None     
      
-#gets ids from the database to check if they already exist in the database
+# Retrieve existing canonical job IDs for fast duplicate detection.
 def get_existing_ids(
     collection_name: str | None = None,
 ) -> set[str]:
@@ -39,7 +39,7 @@ def get_existing_ids(
 def insert_documents(
     documents: list[dict],
     collection_name: str | None = None,
-) -> int:
+ ) -> tuple[int, int]:
     """
     Insert multiple documents into MongoDB.
 
@@ -49,29 +49,31 @@ def insert_documents(
                          default collection when not provided.
 
     Returns:
-        Number of documents inserted.
+        Number of documents inserted and number of duplicates skipped.
     """
     if not documents:
-        return 0
+        return 0, 0
 
     collection = get_collection(collection_name)
     existing_ids = get_existing_ids(collection_name)
 
     try:
         inserted = 0
+        duplicates = 0
 
         for document in documents:
 
             job_id = document.get("job", {}).get("id")
 
             if job_id in existing_ids:
+                duplicates += 1
                 continue
 
             collection.insert_one(document)
             existing_ids.add(job_id)
             inserted += 1
 
-        return inserted
+        return inserted, duplicates
 
     except PyMongoError as exc:
         raise RuntimeError(
