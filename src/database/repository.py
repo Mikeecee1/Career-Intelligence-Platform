@@ -4,6 +4,16 @@ from pymongo.errors import PyMongoError
 
 from src.database.connection import get_collection
 
+def document_exists(
+    document: dict,
+    collection_name: str | None = None,
+) -> bool:
+    """
+    Return True if the document already exists.
+    """
+    collection = get_collection(collection_name)
+    return collection.find_one({"job.id": document.get("job", {}).get("id")}) is not None          
+  
 
 def insert_documents(
     documents: list[dict],
@@ -26,8 +36,17 @@ def insert_documents(
     collection = get_collection(collection_name)
 
     try:
-        result = collection.insert_many(documents)
-        return len(result.inserted_ids)
+        inserted = 0
+
+        for document in documents:
+
+            if document_exists(document, collection_name):
+                continue
+
+            collection.insert_one(document)
+            inserted += 1
+
+        return inserted
 
     except PyMongoError as exc:
         raise RuntimeError(
