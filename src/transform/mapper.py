@@ -1,4 +1,25 @@
+import pandas as pd
 
+#helper functions
+# Handles normalisation of values from the pandas dataframe to ensure they are JSON-safe and consistent.
+def normalise_value(value):
+    """
+    Convert pandas values into JSON-safe Python values.
+    """
+
+    if pd.isna(value):
+        return None
+
+    if isinstance(value, str):
+        return value.strip()
+
+    return value
+
+#Wrapper function to get a value from a row and normalise it.
+def get_value(row: dict, field: str):
+    return normalise_value(row.get(field))
+
+#document mapping functions
 
 def build_job_document(row: dict) -> dict:
     """
@@ -8,43 +29,49 @@ def build_job_document(row: dict) -> dict:
     return {
 
         "job": {
-            "id": row.get("job_reference"),
-            "title": row.get("job_title"),
-            "description": row.get("full_description"),
+            "id": get_value(row, "job_reference"),
+            "title": get_value(row, "job_title"),
+            "description": get_value(row, "full_description"),
             "requirements": [],
         },
 
         "organisation": {
-            "name": row.get("employer"),
-            "department": row.get("department"),
+            "name": get_value(row, "employer"),
+            "department": get_value(row, "department"),
         },
 
         "employment": {
-            "contract_type": row.get("job_type"),
-            "working_pattern": row.get("working_pattern"),
+            "contract_type": get_value(row, "job_type"),
+            "working_pattern": get_value(row, "working_pattern"),
             "salary": {
-                "minimum": row.get("json_salary_min"),
-                "maximum": row.get("json_salary_max"),
-                "pay_band": row.get("pay_band"),
-                "pay_scheme": row.get("pay_scheme"),
+                "minimum": get_value(row, "json_salary_min"),
+                "maximum": get_value(row, "json_salary_max"),
+                "pay_band": get_value(row, "pay_band"),
+                "pay_scheme": get_value(row, "pay_scheme"),
             },
         },
 
         "location": {
-            "town": row.get("location"),
-            "postcode": row.get("json_address_postcode"),
-            "latitude": row.get("json_lat"),
-            "longitude": row.get("json_lng"),
+            "town": get_value(row, "location"),
+            "postcode": get_value(row, "json_address_postcode"),
+            "latitude": get_value(row, "json_lat"),
+            "longitude": get_value(row, "json_lng"),
         },
 
         "dates": {
-            "published": row.get("json_date_posted"),
-            "closing": row.get("json_closing_date"),
+            "published": get_value(row, "json_date_posted"),
+            "closing": get_value(row, "json_closing_date"),
         },
-
+        # Metadata is currently hard-coded for the initial NHS implementation.
+        # As the platform evolves, these values will be derived from the active
+        # data source configuration, allowing the same pipeline to process
+        # multiple recruitment providers without code changes.
         "metadata": {
             "source": "NHS Jobs",
-            "scrape_date": row.get("scrape_dt"),
+            "dataset": "NHS Jobs March 2019",
+            "source_id": get_value(row, "job_reference"),
+            "scrape_date": get_value(row, "scrape_dt"),
+            "schema_version": 1,
         },
 
         "ai": {
