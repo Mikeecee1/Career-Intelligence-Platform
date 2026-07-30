@@ -193,9 +193,10 @@ Career-Intelligence-Platform/
 ├── .env.example
 ├── .gitignore
 ├── app.py
-├── config.py
 ├── README.md
+├── README_old.md
 ├── requirements.txt
+├── notes.md
 ├── assets/
 │   └── schema.md
 ├── data/
@@ -212,9 +213,13 @@ Career-Intelligence-Platform/
 │   ├── analytics/
 │   ├── clean/
 │   │   └── clean.py
+│   ├── config.py
 │   ├── database/
-│   │   └── csv_loader.py
+│   │   ├── connection.py
+│   │   ├── query.py
+│   │   └── repository.py
 │   ├── extract/
+│   │   └── csv_loader.py
 │   ├── load/
 │   ├── models/
 │   │   └── career_document.py
@@ -222,8 +227,13 @@ Career-Intelligence-Platform/
 │   │   └── reports.py
 │   ├── transform/
 │   │   └── mapper.py
-│   └── utils/
+│   ├── utils/
+│   └── validation/
+│       └── validator.py
 ├── tests/
+│   ├── test_connection.py
+│   ├── test_repository.py
+│   └── test_repository_2.py
 └── .venv/
 ```
 
