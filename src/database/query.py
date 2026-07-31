@@ -75,7 +75,7 @@ def jobs_by_contract_type(
         },
         {
             "$group": {
-                "_id": "$employment.type",
+                "_id": "$employment.contract_type",
                 "jobs": {"$sum": 1},
             }
         },
@@ -113,21 +113,24 @@ def salary_statistics(
     collection = get_collection(collection_name)
 
     pipeline = [
-        {
-            "$match": {
-                "salary.minimum": {"$exists": True, "$ne": None},
+    {
+        "$match": {
+            "employment.salary.minimum": {
+                "$exists": True,
+                "$ne": None,
             }
-        },
-        {
-            "$group": {
-                "_id": None,
-                "count": {"$sum": 1},
-                "min_salary": {"$min": "$employment.salary"},
-                "max_salary": {"$max": "$employment.salary"},
-                "average_salary": {"$avg": "$employment.salary"},
-            }
-        },
-    ]
+        }
+    },
+    {
+        "$group": {
+            "_id": None,
+            "count": {"$sum": 1},
+            "min_salary": {"$min": "$employment.salary.minimum"},
+            "max_salary": {"$max": "$employment.salary.maximum"},
+            "average_salary": {"$avg": "$employment.salary.minimum"},
+        }
+    },
+]
 
     result = list(collection.aggregate(pipeline))
     if not result:
