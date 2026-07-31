@@ -128,6 +128,8 @@ Key business benefits include:
 
 ## High-Level Architecture
 
+```
+
                     Recruitment Data Sources
                                │
              ┌─────────────────┴─────────────────┐
@@ -151,6 +153,7 @@ Key business benefits include:
                 ┌────────────┴────────────┐
                 ▼                         ▼
            Analytics             AI Applications
+```
 
 ---
 
@@ -313,6 +316,7 @@ Career-Intelligence-Platform/
 
 **MongoDB Collection structure**
 
+```
 jobs
 │
 ├── job
@@ -343,9 +347,9 @@ jobs
 ├── metadata
 │
 └── ai
+```
 
 ---
-
 
 ## AI Roadmap
 
@@ -399,7 +403,100 @@ The platform will profile, clean, transform, validate and store Career Intellige
 
 ---
 
-## Future Improvements
+## Project Roadmap
+
+The Career Intelligence Platform is being developed iteratively, with each phase adding new capabilities while building upon a stable canonical data model.
+
+```
+Phase 1
+ETL Pipeline
+     │
+     ▼
+Phase 2
+Analytics & Visualisation
+     │
+     ▼
+Phase 3
+Multi-Source Platform
+     │
+     ▼
+Phase 4
+AI-Powered Career Intelligence
+```
+
+### Phase 1 – Core Data Platform ✅
+
+The initial implementation demonstrates the complete ETL pipeline using the NHS Jobs dataset.
+
+**Completed**
+
+- CSV data ingestion
+- Dataset profiling and reporting
+- Configurable data cleaning
+- Canonical document mapping
+- Document validation
+- MongoDB document storage
+- Repository (CRUD) layer
+- Initial analytical query framework
+
+---
+
+### Phase 2 – Analytics & Business Intelligence *(Current)*
+
+Transform stored recruitment data into actionable labour market insights.
+
+**Objectives**
+
+- Complete analytical query library
+- Interactive data visualisation
+- Employment trend analysis
+- Salary analysis
+- Geographic vacancy analysis
+- Employer and organisation reporting
+- Jupyter notebook demonstrations
+- Optional EC2-hosted MongoDB deployment
+
+---
+
+### Phase 3 – Platform Expansion
+
+Extend the platform beyond a single recruitment provider.
+
+**Objectives**
+
+- Multiple recruitment datasets
+- API-based data ingestion
+- Configuration-driven schema mappings
+- Automatic field alias recognition
+- Expanded metadata model
+- Databricks integration
+- Cloud-based processing pipeline
+
+---
+
+### Phase 4 – AI & Intelligent Data Integration
+
+Introduce AI to reduce manual configuration and provide richer analytical capabilities.
+
+**Objectives**
+
+- AI-assisted schema discovery
+- Intelligent field mapping
+- Skills extraction using Large Language Models
+- Duplicate vacancy detection across providers
+- Semantic search using vector embeddings
+- Career similarity recommendations
+- Labour market intelligence services
+
+---
+
+### Long-Term Vision
+
+The long-term objective is to create a reusable Career Intelligence Platform capable of integrating heterogeneous recruitment data from multiple providers into a common analytical model.
+
+Rather than developing bespoke ETL pipelines for individual datasets, new recruitment sources should be onboarded primarily through configuration, schema mapping and AI-assisted discovery while preserving a stable canonical document structure.
+
+This architecture enables analytics, reporting, semantic search and future AI applications to operate independently of the underlying recruitment provider.
 
 ## Future Improvements
 
