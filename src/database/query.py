@@ -20,9 +20,13 @@ def jobs_by_source(collection_name: str | None = None) -> list[dict[str, Any]]:
     pass
 '''
 
-def jobs_by_location(collection_name: str | None = None) -> list[dict[str, Any]]:
+def jobs_by_location(
+    limit: int | None = 10,
+    collection_name: str | None = None,
+) -> list[dict[str, Any]]:
     """Return job counts grouped by town."""
     collection = get_collection(collection_name)
+    max_limit = None if limit is None else max(limit, 0)
 
     pipeline = [
         {
@@ -41,7 +45,12 @@ def jobs_by_location(collection_name: str | None = None) -> list[dict[str, Any]]
         },
     ]
 
+    if max_limit is not None:
+        pipeline.append({"$limit": max_limit})
+
     result = list(collection.aggregate(pipeline))
+    #if max_limit is not None:
+    #    result = result[:max_limit]
 
     return [
         {
@@ -62,10 +71,12 @@ def jobs_by_organisation(collection_name: str | None = None) -> list[dict[str, A
 # ---------------------------------------------------------------------
 
 def jobs_by_contract_type(
+    limit: int | None = 10,
     collection_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Return job counts grouped by contract type."""
     collection = get_collection(collection_name)
+    max_limit = None if limit is None else max(limit, 0)
 
     pipeline = [
         {
@@ -84,7 +95,12 @@ def jobs_by_contract_type(
         },
     ]
 
+    if max_limit is not None:
+        pipeline.append({"$limit": max_limit})
+
     result = list(collection.aggregate(pipeline))
+    #if max_limit is not None:
+    #    result = result[:max_limit]
 
     return [
         {
@@ -155,10 +171,12 @@ def salary_statistics(
 # ---------------------------------------------------------------------
 
 def jobs_by_publish_date(
+    limit: int | None = 10,
     collection_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Return jobs grouped by publication date."""
     collection = get_collection(collection_name)
+    max_limit = None if limit is None else max(limit, 0)
 
     pipeline = [
         {
@@ -182,7 +200,12 @@ def jobs_by_publish_date(
         },
     ]
 
+    if max_limit is not None:
+        pipeline.append({"$limit": max_limit})
+
     result = list(collection.aggregate(pipeline))
+    #if max_limit is not None:
+    #    result = result[:max_limit]
 
     return [
         {
@@ -210,11 +233,12 @@ def jobs_closing_soon(
 # ---------------------------------------------------------------------
 
 def top_employers(
-    limit: int = 10,
+    limit: int | None = 10,
     collection_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Return the employers with the most vacancies."""
     collection = get_collection(collection_name)
+    max_limit = None if limit is None else max(limit, 0)
 
     pipeline = [
         {
@@ -231,12 +255,14 @@ def top_employers(
         {
             "$sort": {"jobs": -1, "_id": 1},
         },
-        {
-            "$limit": max(limit, 0),
-        },
     ]
 
+    if max_limit is not None:
+        pipeline.append({"$limit": max_limit})
+
     result = list(collection.aggregate(pipeline))
+    #if max_limit is not None:
+    #    result = result[:max_limit]
 
     return [
         {
@@ -247,11 +273,12 @@ def top_employers(
     ]
 
 def top_locations(
-    limit: int = 10,
+    limit: int | None = 10,
     collection_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Return the locations with the most vacancies."""
     collection = get_collection(collection_name)
+    max_limit = None if limit is None else max(limit, 0)
 
     pipeline = [
         {
@@ -268,12 +295,14 @@ def top_locations(
         {
             "$sort": {"jobs": -1, "_id": 1},
         },
-        {
-            "$limit": max(limit, 0),
-        },
     ]
 
+    if max_limit is not None:
+        pipeline.append({"$limit": max_limit})
+
     result = list(collection.aggregate(pipeline))
+    #if max_limit is not None:
+    #    result = result[:max_limit]
 
     return [
         {
@@ -284,11 +313,12 @@ def top_locations(
     ]
 
 def top_specialties(
-    limit: int = 10,
+    limit: int | None = 10,
     collection_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Return the most common specialties."""
     collection = get_collection(collection_name)
+    max_limit = None if limit is None else max(limit, 0)
 
     pipeline = [
         {
@@ -305,12 +335,14 @@ def top_specialties(
         {
             "$sort": {"jobs": -1, "_id": 1},
         },
-        {
-            "$limit": max(limit, 0),
-        },
     ]
 
+    if max_limit is not None:
+        pipeline.append({"$limit": max_limit})
+
     result = list(collection.aggregate(pipeline))
+    #if max_limit is not None:
+    #    result = result[:max_limit]
 
     return [
         {
@@ -326,60 +358,93 @@ def top_specialties(
 
 def search_job_title(
     keyword: str,
+    limit: int | None = 10,
     collection_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Search job titles by keyword."""
     collection = get_collection(collection_name)
+    max_limit = None if limit is None else max(limit, 0)
 
-    return list(
-        collection.find(
-            {
-                "job.title": {
-                    "$regex": keyword,
-                    "$options": "i",
-                }
-            },
-            {"_id": 0},
-        )
+    cursor = collection.find(
+        {
+            "job.title": {
+                "$regex": keyword,
+                "$options": "i",
+            }
+        },
+        {"_id": 0},
     )
+
+    if max_limit is not None:
+        try:
+            cursor = cursor.limit(max_limit)
+        except AttributeError:
+            pass
+
+    result = list(cursor)
+    #if max_limit is not None:
+    #    result = result[:max_limit]
+    return result
 
 def search_organisation(
     organisation: str,
+    limit: int | None = 10,
     collection_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Search by organisation name."""
     collection = get_collection(collection_name)
+    max_limit = None if limit is None else max(limit, 0)
 
-    return list(
-        collection.find(
-            {
-                "organisation.name": {
-                    "$regex": organisation,
-                    "$options": "i",
-                }
-            },
-            {"_id": 0},
-        )
+    cursor = collection.find(
+        {
+            "organisation.name": {
+                "$regex": organisation,
+                "$options": "i",
+            }
+        },
+        {"_id": 0},
     )
+
+    if max_limit is not None:
+        try:
+            cursor = cursor.limit(max_limit)
+        except AttributeError:
+            pass
+
+    result = list(cursor)
+    #if max_limit is not None:
+    #    result = result[:max_limit]
+    return result
 
 def search_location(
     town: str,
+    limit: int | None = 10,
     collection_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Search by town."""
     collection = get_collection(collection_name)
+    max_limit = None if limit is None else max(limit, 0)
 
-    return list(
-        collection.find(
-            {
-                "location.town": {
-                    "$regex": town,
-                    "$options": "i",
-                }
-            },
-            {"_id": 0},
-        )
+    cursor = collection.find(
+        {
+            "location.town": {
+                "$regex": town,
+                "$options": "i",
+            }
+        },
+        {"_id": 0},
     )
+
+    if max_limit is not None:
+        try:
+            cursor = cursor.limit(max_limit)
+        except AttributeError:
+            pass
+
+    result = list(cursor)
+    #if max_limit is not None:
+    #    result = result[:max_limit]
+    return result
 
 # ---------------------------------------------------------------------
 # Future AI queries
