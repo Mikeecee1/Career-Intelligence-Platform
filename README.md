@@ -489,6 +489,30 @@ Introduce AI to reduce manual configuration and provide richer analytical capabi
 - Labour market intelligence services
 
 ---
+# Development Notes #
+
+## Notes on salary outliers from NHS dataset ##
+
+Known source data issues
+
+The NHS Jobs dataset contains a small number of anomalous salary values (for example multi-million pound maximum salaries). These values are preserved in the canonical dataset and identified by the platform's data quality analytics rather than being automatically corrected.
+
+Data Quality Investigation
+
+Several salary outliers appear to be caused by
+incorrect formatting in the source dataset.
+
+Examples:
+
+4908600 -> likely 49,086.00
+8195110 -> likely 81,951.10
+7791000 -> likely 77,910.00
+
+The original values are preserved in MongoDB.
+No automatic correction is currently applied.
+
+
+---
 
 ### Long-Term Vision
 
