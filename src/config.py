@@ -29,3 +29,7 @@ CLEANING_OPTIONS = {
     "convert_dates": True,
     "convert_salary": True,
 }
+
+#salary band configuration
+MAX_ANALYSIS_SALARY = 250_000
+SALARY_BIN_SIZE = 10_000

@@ -3,6 +3,7 @@
 from typing import Any
 
 from src.database.connection import get_collection
+from src.config import SALARY_BIN_SIZE, MAX_ANALYSIS_SALARY
 
 
 # ---------------------------------------------------------------------
@@ -165,8 +166,187 @@ def salary_statistics(
         "average_salary": summary.get("average_salary"),
     }
 
+def salary_distribution(
+    bin_size: int = SALARY_BIN_SIZE,
+    maximum_salary: int = MAX_ANALYSIS_SALARY,
+    collection_name: str | None = None,
+) -> list[dict]:
+    """Return salary distribution in specified bins."""
+    collection = get_collection(collection_name)
 
-# ---------------------------------------------------------------------
+    pipeline = [
+        {
+            "$match": {
+                "employment.salary.minimum": {"$exists": True, "$ne": None, "$gte": 0, "$lte": maximum_salary},
+            }
+        },
+        {
+            "$project": {
+                "salary_bin": {
+                    "$floor": {
+                        "$divide": ["$employment.salary.minimum", bin_size]
+                    }
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": "$salary_bin",
+                "jobs": {"$sum": 1},
+            }
+        },
+        {
+            "$sort": {"_id": 1},
+        },
+    ]
+
+    result = list(collection.aggregate(pipeline))
+    distribution = []
+    for row in result:
+        salary_bin = row["_id"]
+        jobs = row["jobs"]
+        salary_range_start = salary_bin * bin_size
+        salary_range_end = min(salary_range_start + bin_size - 1, maximum_salary)
+        distribution.append({
+            "salary_range": (
+                f"£{salary_range_start//1000}k"
+                f"–£{salary_range_end//1000}k"
+            ),
+            "jobs": jobs,
+        })
+
+    return distribution
+
+#Helper function to check outliers in salary values - less than 0 or greater than MAX_ANALYSIS_SALARY & missing values
+def salary_outliers(
+    collection_name: str | None = None,
+) -> dict[str, Any]:
+    """Return jobs with extreme or missing salary values."""
+    collection = get_collection(collection_name)
+
+    pipeline = [
+        {
+            "$group": {
+                "_id": None,
+                "below_minimum": {
+                    "$sum": {
+                        "$cond": [
+                            {
+                                "$and": [
+                                    {"$ne": ["$employment.salary.minimum", None]},
+                                    {"$lt": ["$employment.salary.minimum", 0]},
+                                ]
+                            },
+                            1,
+                            0,
+                        ]
+                    }
+                },
+                "above_maximum": {
+                    "$sum": {
+                        "$cond": [
+                            {
+                                "$or": [
+                                    {
+                                        "$gt": [
+                                            "$employment.salary.minimum",
+                                            MAX_ANALYSIS_SALARY,
+                                        ]
+                                    },
+                                    {
+                                        "$gt": [
+                                            "$employment.salary.maximum",
+                                            MAX_ANALYSIS_SALARY,
+                                        ]
+                                    },
+                                ]
+                            },
+                            1,
+                            0,
+                        ]
+                    }
+                },
+                "missing_salary": {
+                    "$sum": {
+                        "$cond": [
+                            {
+                                "$or": [
+                                    {"$eq": ["$employment.salary.minimum", None]},
+                                    {"$eq": ["$employment.salary.maximum", None]},
+                                ]
+                            },
+                            1,
+                            0,
+                        ]
+                    }
+                },
+            }
+        },
+    ]
+
+    result = list(collection.aggregate(pipeline))
+    if not result:
+        return {
+            "below_minimum": {"jobs": 0},
+            "above_maximum": {"jobs": 0},
+            "missing_salary": {"jobs": 0},
+        }
+
+    summary = result[0]
+    return {
+        "below_minimum": {"jobs": summary.get("below_minimum", 0)},
+        "above_maximum": {"jobs": summary.get("above_maximum", 0)},
+        "missing_salary": {"jobs": summary.get("missing_salary", 0)},
+    }
+
+# List jobs with outlier salaries above MAX_ANALYSIS_SALARY - print job title, job_id, maximum salary, pay scheme
+def list_salary_outliers(
+    limit: int | None = 25,
+    collection_name: str | None = None,
+) -> list[dict[str, Any]]:
+    """
+    Return details of jobs with maximum salaries above MAX_ANALYSIS_SALARY.
+    """
+    collection = get_collection(collection_name)
+    max_limit = None if limit is None else max(limit, 0)
+
+    pipeline = [
+        {
+            "$match": {
+                "employment.salary.maximum": {"$gt": MAX_ANALYSIS_SALARY},
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "title": "$job.title",
+                "job_id": "$job.id",
+                "maximum": "$employment.salary.maximum",
+                "pay_scheme": "$employment.salary.pay_scheme",
+            }
+        },
+        {
+            "$sort": {
+                "maximum": -1
+            }
+        },
+    ]
+
+    if max_limit is not None:
+        pipeline.append({"$limit": max_limit})
+
+    result = list(collection.aggregate(pipeline))
+
+    return [
+        {
+            "title": row.get("title"),
+            "job_id": row.get("job_id"),
+            "maximum": row.get("maximum"),
+            "pay_scheme": row.get("pay_scheme"),
+        }
+        for row in result
+    ]
+#---------------------------------------------------------------------
 # Recruitment trends
 # ---------------------------------------------------------------------
 
