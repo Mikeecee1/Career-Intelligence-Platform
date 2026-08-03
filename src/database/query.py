@@ -3,7 +3,7 @@
 from typing import Any
 
 from src.database.connection import get_collection
-from src.config import SALARY_BIN_SIZE, MAX_ANALYSIS_SALARY
+from src.config import SALARY_BIN_SIZE, MAX_ANALYSIS_SALARY, SALARY_CHART_MAX
 
 
 # ---------------------------------------------------------------------
@@ -166,26 +166,38 @@ def salary_statistics(
         "average_salary": summary.get("average_salary"),
     }
 
+
 def salary_distribution(
     bin_size: int = SALARY_BIN_SIZE,
+    max_bin: int = SALARY_CHART_MAX,
     maximum_salary: int = MAX_ANALYSIS_SALARY,
     collection_name: str | None = None,
 ) -> list[dict]:
-    """Return salary distribution in specified bins."""
+    """Return salary distribution in specified bins with one capped upper bin."""
     collection = get_collection(collection_name)
+
+    # Sentinel bucket id for all values >= max_bin and <= maximum_salary
+    capped_bin_id = (maximum_salary // bin_size) + 1
 
     pipeline = [
         {
             "$match": {
-                "employment.salary.minimum": {"$exists": True, "$ne": None, "$gte": 0, "$lte": maximum_salary},
+                "employment.salary.minimum": {
+                    "$exists": True,
+                    "$ne": None,
+                    "$gte": 0,
+                    "$lte": maximum_salary,
+                },
             }
         },
         {
             "$project": {
                 "salary_bin": {
-                    "$floor": {
-                        "$divide": ["$employment.salary.minimum", bin_size]
-                    }
+                    "$cond": [
+                        {"$gte": ["$employment.salary.minimum", max_bin]},  # changed from $gt
+                        capped_bin_id,
+                        {"$floor": {"$divide": ["$employment.salary.minimum", bin_size]}},
+                    ]
                 }
             }
         },
@@ -195,27 +207,32 @@ def salary_distribution(
                 "jobs": {"$sum": 1},
             }
         },
-        {
-            "$sort": {"_id": 1},
-        },
+        {"$sort": {"_id": 1}},
     ]
 
     result = list(collection.aggregate(pipeline))
     distribution = []
+
     for row in result:
         salary_bin = row["_id"]
         jobs = row["jobs"]
-        salary_range_start = salary_bin * bin_size
-        salary_range_end = min(salary_range_start + bin_size - 1, maximum_salary)
-        distribution.append({
-            "salary_range": (
-                f"£{salary_range_start//1000}k"
-                f"–£{salary_range_end//1000}k"
-            ),
-            "jobs": jobs,
-        })
+
+        if salary_bin == capped_bin_id:
+            salary_range_start = max_bin
+            salary_range_end = maximum_salary
+        else:
+            salary_range_start = salary_bin * bin_size
+            salary_range_end = min(salary_range_start + bin_size - 1, max_bin - 1)
+
+        distribution.append(
+            {
+                "salary_range": f"£{salary_range_start//1000}k–£{salary_range_end//1000}k",
+                "jobs": jobs,
+            }
+        )
 
     return distribution
+
 
 #Helper function to check outliers in salary values - less than 0 or greater than MAX_ANALYSIS_SALARY & missing values
 def salary_outliers(
