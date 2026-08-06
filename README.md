@@ -501,6 +501,7 @@ Data Quality Investigation
 
 Several salary outliers appear to be caused by
 incorrect formatting in the source dataset.
+In addition over 3000 records were missing salaries.
 
 Examples:
 
@@ -510,6 +511,13 @@ Examples:
 
 The original values are preserved in MongoDB.
 No automatic correction is currently applied.
+
+## Engineering Findings
+
+- Salary outliers were detected in the source NHS dataset and isolated through data quality queries.
+- Employer analysis identified central advertising organisations, suggesting employer normalisation will improve future analytics.
+- Location data contains a mixture of towns, hospitals and NHS sites, motivating a future canonical location model.
+- Contract descriptions are semantically similar but inconsistently formatted, supporting a future enrichment layer.
 
 
 ---
