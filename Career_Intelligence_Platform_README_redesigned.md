@@ -159,6 +159,7 @@ This stable model allows downstream analytics to remain independent of individua
 }
 ```
 
+![MongoDB Image](images/MongoDB.png)
 
 ---
 
@@ -170,8 +171,10 @@ The engineering pipeline and query layer were used to investigate the quality an
 
 ### Salary quality
 
-> **[Insert salary distribution chart here]**
+<br>
 
+![Salary Distribution](images/SalaryDistribution.png)
+<br>
 The dataset contains missing salary values and a small number of extreme salary values.
 
 ### Salary anomalies
@@ -186,7 +189,7 @@ Examples include:
 
 These values are preserved rather than silently corrected.
 
-> **[Insert salary outlier visualisation / table here]**
+![Salary Outliers](images/SalaryOutliers.png)
 
 The investigation suggests that several values may result from source formatting problems. The platform identifies them as data-quality issues while retaining the original source values.
 
@@ -198,6 +201,8 @@ The investigation suggests that several values may result from source formatting
 | Locations mix towns, hospitals and NHS sites | More granular canonical location model |
 | Contract descriptions have multiple variants | Controlled contract categories |
 | More than 3,000 records have missing salary information | Missing-data handling and quality reporting |
+
+*See Visualisations notebook for further details*
 
 > **Data quality is not only about nulls and data types. It can also be about whether a value means what the analytical model assumes it means.**
 
@@ -218,23 +223,11 @@ The analytical findings feed back into the platform design.
 | Contract variations | Standardised categories while retaining source values |
 | New/unknown schemas | Configuration-driven mapping and future AI assistance |
 
-```text
-          Source Data
-               │
-               ▼
-        Data Engineering
-               │
-               ▼
-            Analytics
-               │
-               ▼
-        Discover Problems
-               │
-               ▼
-       Improve the Model
-               │
-               └──────────────►
-```
+
+<br><br>
+![data engineering insights](images/DataEngInsights.png)
+<br><br>
+
 
 
 ---
@@ -245,27 +238,7 @@ The long-term purpose is not to create a single NHS Jobs database.
 
 The platform should allow different sources to retain their own source-specific characteristics while mapping useful concepts into a common analytical model.
 
-```text
-                  CAREER INTELLIGENCE PLATFORM
-
-        ┌────────────────┬────────────────┬────────────────┐
-        ▼                ▼                ▼
-     NHS Jobs       NHS Scotland       Future source
-     adverts        workforce data      / API
-        │                │                │
-        ▼                ▼                ▼
-  Source-specific extraction / cleaning / mapping
-        │                │                │
-        └────────────────┼────────────────┘
-                         ▼
-                 CANONICAL MODEL
-                         │
-                         ▼
-                     MONGODB
-                         │
-                         ▼
-                    ANALYTICS
-```
+![Extending the Model](images/ExtendingModel.png)
 
 The engineering challenge is to determine:
 
@@ -312,38 +285,7 @@ employment.contract_type
 
 A future workflow could be:
 
-```text
-             NEW / UNKNOWN DATASET
-                      │
-                      ▼
-                 PROFILE DATA
-                      │
-                      ▼
-              IDENTIFY UNKNOWN
-                  FIELD
-                      │
-                      ▼
-             SEMANTIC SEARCH
-                      │
-          ┌───────────┴───────────┐
-          ▼                       ▼
- Existing mappings          Similar fields /
-   and examples              known concepts
-          │                       │
-          └───────────┬───────────┘
-                      ▼
-              AI-SUGGESTED MAPPING
-                      │
-                      ▼
-                 VALIDATION
-                      │
-             ┌────────┴────────┐
-             ▼                 ▼
-           Accept          Review / reject
-             │
-             ▼
-          CANONICAL MODEL
-```
+![Potential Future Workflow](images/FutureWorkflow.png)
 
 For example:
 
@@ -421,26 +363,7 @@ Use the notebook/visualisation to demonstrate how the engineered data exposes a 
 
 The project demonstrates that data engineering is not simply about moving data from A to B.
 
-```text
-          DISPARATE DATA
-                │
-                ▼
-        ENGINEERING PROCESS
-                │
-       ┌────────┼────────┐
-       ▼        ▼        ▼
-    Quality   Schema   Structure
-       │        │        │
-       └────────┼────────┘
-                ▼
-       CANONICAL DATA MODEL
-                │
-                ▼
-          RELIABLE ANALYTICS
-                │
-                ▼
-        REUSABLE PLATFORM
-```
+![What does the Project Demonstrate](images/WhatProjectDemonstrates.png)
 
 The NHS Jobs dataset provides the proof of concept.
 
