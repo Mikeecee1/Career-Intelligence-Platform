@@ -67,6 +67,18 @@ Common challenges include:
 
 These issues increase development effort and make labour market analysis difficult.
 
+```
+Disparate / limited sources
+          ↓
+Different structures
+          ↓
+Different terminology
+          ↓
+Missing / anomalous data
+          ↓
+Difficult to analyse consistently
+```
+
 ---
 
 ## Proposed Solution
@@ -408,20 +420,25 @@ The platform will profile, clean, transform, validate and store Career Intellige
 The Career Intelligence Platform is being developed iteratively, with each phase adding new capabilities while building upon a stable canonical data model.
 
 ```
-Phase 1
-ETL Pipeline
-     │
-     ▼
-Phase 2
-Analytics & Visualisation
-     │
-     ▼
-Phase 3
-Multi-Source Platform
-     │
-     ▼
-Phase 4
-AI-Powered Career Intelligence
+Phase 1 — Prove the engineering pipeline
+        NHS Jobs
+
+             ↓
+
+Phase 2 — Prove analytical value
+        What can we learn?
+        What data-quality problems exist?
+
+             ↓
+
+Phase 3 — Prove generalisation
+        Can the same architecture
+        ingest fundamentally different sources?
+
+             ↓
+
+Phase 4 — Reduce manual integration
+        AI-assisted mapping/enrichment
 ```
 
 ### Phase 1 – Core Data Platform ✅
@@ -455,6 +472,36 @@ Transform stored recruitment data into actionable labour market insights.
 - Employer and organisation reporting
 - Jupyter notebook demonstrations
 - Optional EC2-hosted MongoDB deployment
+
+Extract
+
+↓
+
+Clean
+
+↓
+
+Canonical Mapping
+
+↓
+
+Validation
+
+↓
+
+MongoDB
+
+↓
+
+Repository
+
+↓
+
+Analytics
+
+↓
+
+Engineering Visualisations
 
 ---
 
