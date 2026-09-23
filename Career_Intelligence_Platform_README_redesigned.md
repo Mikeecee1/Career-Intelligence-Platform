@@ -44,12 +44,7 @@ The challenge therefore becomes:
 
 > **How can limited, disparate and inconsistent data be engineered into a robust resource for analytics?**
 
-
-![Problem Hero Diagram](images/problem2.png)
-
-
-> **[Presentation visual: replace this with a polished diagram]**
-
+![Problem Area Diagram](images/problem.png)
 
 ---
 
@@ -57,31 +52,11 @@ The challenge therefore becomes:
 
 The platform applies a repeatable data engineering process rather than building analysis directly on the source dataset.
 
-```text
-SOURCE DATA
-     │
-     ▼
-  EXTRACT
-     │
-     ▼
-  PROFILE
-     │
-     ▼
-   CLEAN
-     │
-     ▼
- CANONICAL
-  MAPPING
-     │
-     ▼
- VALIDATE
-     │
-     ▼
-  MONGODB
-     │
-     ▼
- ANALYTICS
-```
+<br><br><br>
+
+![Data Engineering Diagram](images/DataEng.png)
+
+<br><br><br>
 
 | Stage | Purpose |
 |---|---|
@@ -113,31 +88,10 @@ The dataset provides individual recruitment records containing information such 
 - job description
 
 The objective is not to claim that this represents the complete healthcare recruitment market. It provides a real dataset against which the platform can demonstrate:
+<br><br><br>
+![alt text](images/ProofConcept.png)
+<br><br><br>
 
-```text
-NHS Jobs dataset
-       │
-       ▼
-   Extraction
-       │
-       ▼
-    Profiling
-       │
-       ▼
-     Cleaning
-       │
-       ▼
-Canonical Mapping
-       │
-       ▼
-    Validation
-       │
-       ▼
-    MongoDB
-       │
-       ▼
-    Analytics
-```
 
 > **[Presentation visual: raw source record → canonical document]**
 
@@ -147,19 +101,9 @@ Canonical Mapping
 ## 4. The Canonical Data Model
 
 The platform separates the source schema from the analytical model.
-
-```text
-                 Career Intelligence
-                       Document
-                          │
-       ┌──────────┬───────┼───────┬──────────┐
-       ▼          ▼       ▼       ▼          ▼
-      Job    Organisation Employment Location Dates
-                          │
-                    ┌─────┴─────┐
-                    ▼           ▼
-                Metadata        AI
-```
+<br><br>
+![Canonical Document Diagram](images/CanonicalDocument.png)
+<br><br>
 
 The current canonical document consists of:
 
