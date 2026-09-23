@@ -1,87 +1,449 @@
 # Career Intelligence Platform
 
-> **The Career Intelligence Platform** is a cloud-native, modular data engineering platform for ingesting, profiling, transforming and analysing recruitment data. It is designed to standardise heterogeneous recruitment datasets into a common **Career Intelligence document model**, enabling workforce analytics, labour market intelligence and future AI-powered applications.
->
-> The NHS Jobs dataset is used as the initial implementation to validate the platform architecture. The platform itself is intentionally dataset-agnostic and designed to support additional recruitment providers with minimal code changes.
+> **The purpose of the platform is to engineer disparate data sources into a standardised, robust resource for analytics.**
+
+The **Career Intelligence Platform** is a modular data engineering platform for ingesting, profiling, transforming and analysing recruitment data.
+
+The NHS Jobs dataset is the initial proof of concept. The platform is intentionally dataset-agnostic: the longer-term objective is to apply the same engineering approach to other recruitment and workforce data sources.
 
 ---
 
-## Table of Contents
+## Presentation Flow
 
-<details>
-<summary>Click to expand</summary>
-
-- [Project Summary](#project-summary)
-- [Design Philosophy](#design-philosophy)
-- [Business Problem](#business-problem)
-- [Proposed Solution](#proposed-solution)
-- [Key Features](#key-features)
-- [Business Benefits](#business-benefits)
-- [System Architecture](#system-architecture)
-- [Architecture Principles](#architecture-principles)
-- [High-Level Architecture](#high-level-architecture)
-- [Component Responsibilities](#component-responsibilities)
-- [Technology Stack](#technology-stack)
-- [Canonical Data Model](#canonical-data-model)
-- [Project Structure](#project-structure)
-- [Data Model](#data-model)
-- [AI Roadmap](#ai-roadmap)
-- [Installation & Setup](#installation--setup)
-- [Future Improvements](#future-improvements)
-- [Conclusion](#conclusion)
-
-</details>
+1. [The Problem](#1-the-problem)
+2. [The Data Engineering Approach](#2-the-data-engineering-approach)
+3. [Proof of Concept — NHS Jobs](#3-proof-of-concept--nhs-jobs)
+4. [The Canonical Data Model](#4-the-canonical-data-model)
+5. [Data Quality — What Did the Engineering Reveal?](#5-data-quality--what-did-the-engineering-reveal)
+6. [From Data Quality to Engineering Requirements](#6-from-data-quality-to-engineering-requirements)
+7. [Extending Beyond NHS Jobs](#7-extending-beyond-nhs-jobs)
+8. [AI-Augmented Data Integration](#8-ai-augmented-data-integration)
+9. [Presentation Demonstration](#9-presentation-demonstration)
+10. [What the Project Demonstrates](#10-what-the-project-demonstrates)
+11. [Roadmap](#11-roadmap)
+12. [Technical Documentation](#12-technical-documentation)
 
 ---
 
-## Project Summary
+## 1. The Problem
 
-Recruitment data is valuable not only to job seekers but also to organisations analysing workforce demand, regional skills shortages, salary trends and labour market activity.
+Meaningful recruitment and labour-market analysis depends on the quality and consistency of the underlying data.
 
-The Career Intelligence Platform provides a reusable cloud-native ETL architecture that ingests recruitment datasets, profiles their structure, cleans and validates the data, and maps every source into a common canonical document model.
+In practice, useful data can be:
 
-Once standardised, the data can be analysed consistently regardless of its original source and provides a foundation for semantic search, AI enrichment and workforce analytics.
+- fragmented across different providers
+- available at different levels of detail
+- structured using different schemas
+- inconsistent in terminology
+- incomplete or anomalous
+- affected by changes to source systems over time
+
+Publicly available healthcare recruitment data also illustrates a practical problem: there is not necessarily one comprehensive, consistent dataset that can simply be downloaded and analysed.
+
+The challenge therefore becomes:
+
+> **How can limited, disparate and inconsistent data be engineered into a robust resource for analytics?**
+
+![Problem Area Diagram](images/problem.png)
 
 ---
 
-## Design Philosophy
+## 2. The Data Engineering Approach
 
-The Career Intelligence Platform is designed around the principle of separating business logic from source-specific implementation.
+The platform applies a repeatable data engineering process rather than building analysis directly on the source dataset.
 
-Rather than building bespoke ETL pipelines for individual recruitment datasets, the platform standardises all data into a common Career Intelligence document model. This approach allows new data sources to be integrated primarily through configuration and mapping rather than changes to application code.
+<br><br><br>
 
-As the platform evolves, AI-assisted schema discovery and an expanding alias library will further reduce the effort required to onboard new recruitment providers while maintaining a consistent analytical model.
+![Data Engineering Diagram](images/DataEng.png)
+
+<br><br><br>
+
+| Stage | Purpose |
+|---|---|
+| **Extract** | Ingest source data without coupling downstream processing to the source format |
+| **Profile** | Understand structure, data types, missing values and potential quality issues |
+| **Clean** | Apply source-specific data-quality and formatting rules |
+| **Canonical Mapping** | Translate source fields into a common analytical model |
+| **Validate** | Check that generated documents conform to the expected structure |
+| **Store** | Persist validated documents independently of the original source schema |
+| **Analyse** | Query the engineered dataset to test its usefulness and expose further quality issues |
+
+> **The dataset is the proof of concept. The engineering process is the reusable asset.**
+
 
 ---
 
-## Business Problem
+## 3. Proof of Concept — NHS Jobs
 
-Organisations wishing to analyse recruitment trends often spend significant effort cleaning and standardising data before meaningful analysis can begin.
+The current implementation uses a historical **NHS Jobs** dataset to validate the architecture.
 
-Common challenges include:
+The dataset provides individual recruitment records containing information such as:
 
-- Different schemas between recruitment providers
-- Inconsistent salary and location formats
-- Missing or incomplete values
-- Bespoke ETL pipelines for every new dataset
+- job title and reference
+- employer and department
+- salary and pay band
+- contract and working pattern
+- location
+- publication and closing dates
+- job description
 
-These issues increase development effort and make labour market analysis difficult.
+The objective is not to claim that this represents the complete healthcare recruitment market. It provides a real dataset against which the platform can demonstrate:
+<br><br><br>
+![alt text](images/ProofConcept.png)
+<br><br><br>
 
+
+> **[Presentation visual: raw source record → canonical document]**
+
+
+---
+
+## 4. The Canonical Data Model
+
+The platform separates the source schema from the analytical model.
+<br><br>
+![Canonical Document Diagram](images/CanonicalDocument.png)
+<br><br>
+
+The current canonical document consists of:
+
+- **job** – vacancy information, identifiers and descriptions
+- **organisation** – employer and organisational information
+- **employment** – contract, salary and working pattern
+- **location** – geographic information
+- **dates** – publication and closing dates
+- **metadata** – dataset provenance and ingestion information
+- **ai** – reserved for future AI enrichment, semantic metadata and embeddings
+
+This stable model allows downstream analytics to remain independent of individual recruitment providers.
+
+### Example
+
+```json
+{
+  "job": {
+    "id": "...",
+    "title": "...",
+    "description": "..."
+  },
+  "organisation": {
+    "name": "...",
+    "department": "..."
+  },
+  "employment": {
+    "contract_type": "...",
+    "working_pattern": "...",
+    "salary": {
+      "minimum": 0,
+      "maximum": 0
+    }
+  },
+  "location": {
+    "town": "...",
+    "postcode": "...",
+    "latitude": 0,
+    "longitude": 0
+  },
+  "dates": {
+    "published": "...",
+    "closing": "..."
+  },
+  "metadata": {
+    "source": "NHS Jobs",
+    "schema_version": 1
+  },
+  "ai": {
+    "skills": [],
+    "embedding": null
+  }
+}
 ```
-Disparate / limited sources
-          ↓
-Different structures
-          ↓
-Different terminology
-          ↓
-Missing / anomalous data
-          ↓
-Difficult to analyse consistently
-```
+
+![MongoDB Image](images/MongoDB.png)
 
 ---
 
-## Proposed Solution
+## 5. Data Quality — What Did the Engineering Reveal?
+
+Successful ingestion does not mean that the data is ready for analysis.
+
+The engineering pipeline and query layer were used to investigate the quality and meaning of the resulting dataset.
+
+### Salary quality
+
+<br>
+
+![Salary Distribution](images/SalaryDistribution.png)
+<br>
+The dataset contains missing salary values and a small number of extreme salary values.
+
+### Salary anomalies
+
+Examples include:
+
+```text
+4,908,600
+8,195,110
+7,791,000
+```
+
+These values are preserved rather than silently corrected.
+
+![Salary Outliers](images/SalaryOutliers.png)
+
+The investigation suggests that several values may result from source formatting problems. The platform identifies them as data-quality issues while retaining the original source values.
+
+### Semantic and structural issues
+
+| Observation | Engineering implication |
+|---|---|
+| Central advertising organisations appear prominently as employers | Employer/entity normalisation |
+| Locations mix towns, hospitals and NHS sites | More granular canonical location model |
+| Contract descriptions have multiple variants | Controlled contract categories |
+| More than 3,000 records have missing salary information | Missing-data handling and quality reporting |
+
+*See Visualisations notebook for further details*
+
+> **Data quality is not only about nulls and data types. It can also be about whether a value means what the analytical model assumes it means.**
+
+
+---
+
+## 6. From Data Quality to Engineering Requirements
+
+The analytical findings feed back into the platform design.
+
+| Observed problem | Engineering response |
+|---|---|
+| Missing values | Profiling, validation and explicit handling |
+| Salary anomalies | Data-quality rules and anomaly analysis |
+| Different terminology | Canonical mapping |
+| Employer ambiguity | Future entity normalisation |
+| Location granularity differences | Future canonical location model |
+| Contract variations | Standardised categories while retaining source values |
+| New/unknown schemas | Configuration-driven mapping and future AI assistance |
+
+
+<br><br>
+![data engineering insights](images/DataEngInsights.png)
+<br><br>
+
+
+
+---
+
+## 7. Extending Beyond NHS Jobs
+
+The long-term purpose is not to create a single NHS Jobs database.
+
+The platform should allow different sources to retain their own source-specific characteristics while mapping useful concepts into a common analytical model.
+
+![Extending the Model](images/ExtendingModel.png)
+
+The engineering challenge is to determine:
+
+1. What information can be standardised?
+2. What information must remain source-specific?
+3. What information is missing?
+4. What transformations are defensible?
+5. How can provenance be preserved?
+
+> **The objective is not to make different datasets identical. It is to make meaningful concepts comparable while preserving their source context.**
+
+
+---
+
+## 8. AI-Augmented Data Integration
+
+A future objective is to reduce the manual effort required to integrate a new source.
+
+The concept is to use semantic search and AI-assisted mapping to compare an unfamiliar schema with the platform's existing mapping knowledge.
+
+### Example
+
+A new provider supplies:
+
+```text
+job_title
+employer_name
+annual_pay
+town
+job_desc
+contract
+```
+
+The platform already understands concepts such as:
+
+```text
+job.title
+organisation.name
+employment.salary
+location.town
+job.description
+employment.contract_type
+```
+
+A future workflow could be:
+
+![Potential Future Workflow](images/FutureWorkflow.png)
+
+For example:
+
+```text
+"annual_pay"
+      ↓
+AI / semantic matching
+      ↓
+employment.salary
+```
+
+> **AI suggests mappings; the data engineering pipeline validates and controls them.**
+
+This is a future/prototype concept, not part of the current NHS Jobs pipeline.
+
+
+---
+
+## 9. Presentation Demonstration
+
+The demonstration focuses on the complete engineering path rather than individual functions.
+
+### 1. Run the pipeline
+
+```bash
+python app.py
+```
+
+```text
+Load
+  ↓
+Profile
+  ↓
+Clean
+  ↓
+Map
+  ↓
+Validate
+  ↓
+MongoDB
+```
+
+### 2. Inspect the resulting document
+
+Show a real MongoDB document and the canonical structure:
+
+```text
+job
+organisation
+employment
+location
+dates
+metadata
+ai
+```
+
+### 3. Query the engineered data
+
+Demonstrate one or two queries from the query layer:
+
+- total jobs
+- salary statistics
+- top employers
+- contract types
+- salary outliers
+
+### 4. Investigate a quality issue
+
+Use the notebook/visualisation to demonstrate how the engineered data exposes a source-data problem.
+
+
+---
+
+## 10. What the Project Demonstrates
+
+The project demonstrates that data engineering is not simply about moving data from A to B.
+
+![What does the Project Demonstrate](images/WhatProjectDemonstrates.png)
+
+The NHS Jobs dataset provides the proof of concept.
+
+The reusable asset is the engineering process:
+
+> **Profile → clean → standardise → validate → store → analyse**
+
+The next challenge is applying that process to other disparate sources.
+
+
+---
+
+## 11. Roadmap
+
+```text
+PHASE 1
+Prove the engineering pipeline
+NHS Jobs
+      │
+      ▼
+PHASE 2
+Prove analytical value
+Data quality + diagnostics
+      │
+      ▼
+PHASE 3
+Prove generalisation
+Additional sources / APIs
+      │
+      ▼
+PHASE 4
+Reduce manual integration
+AI-assisted mapping + enrichment
+```
+
+### Phase 1 — Core Data Platform ✅
+
+- CSV data ingestion
+- Dataset profiling and reporting
+- Configurable data cleaning
+- Canonical document mapping
+- Document validation
+- MongoDB document storage
+- Repository layer
+- Analytical query framework
+
+### Phase 2 — Analytics & Engineering Findings
+
+- Analytical query library
+- Jupyter notebook demonstrations
+- Salary analysis
+- Employer and location analysis
+- Data-quality investigation
+- Engineering visualisations
+
+### Phase 3 — Platform Expansion
+
+- Multiple recruitment/workforce datasets
+- API-based ingestion
+- Configuration-driven schema mappings
+- Automatic field alias recognition
+- Expanded metadata model
+- Databricks integration
+- Cloud-based processing
+
+### Phase 4 — AI & Intelligent Data Integration
+
+- AI-assisted schema discovery
+- Intelligent field mapping
+- Skills extraction
+- Duplicate vacancy detection
+- Semantic search
+- AI-assisted enrichment
+- Labour-market intelligence services
+
+---
+
+## 12. Technical Documentation
+
+### Architecture
 
 The platform separates:
 
@@ -93,181 +455,57 @@ The platform separates:
 - Storage
 - AI Enrichment
 
-Every recruitment dataset is transformed into a common Career Intelligence document, enabling consistent analytics across multiple sources.
-
----
-
-## Key Features
-
-- Cloud-native modular ETL architecture
-- Canonical Career Intelligence document model
-- Amazon S3 data lake
-- Databricks (Apache Spark)
-- MongoDB document storage
-- Configuration-driven processing
-- Reusable mapping architecture
-- AI-ready document schema
-- Designed for semantic search and RAG
-
----
-
-## Business Benefits
-
-The Career Intelligence Platform provides organisations with a reusable and scalable framework for integrating recruitment data from multiple providers into a common data model. By separating extraction, transformation, mapping and persistence, the platform significantly reduces the effort required to onboard new recruitment datasets.
-
-Unlike bespoke ETL solutions designed for a single source, the platform is intended to become increasingly valuable over time as additional providers, mapping configurations and AI-assisted schema discovery are incorporated.
-
-Key business benefits include:
-
-- Reduced development effort when integrating new recruitment datasets
-- Consistent analytics across heterogeneous data sources
-- Reusable canonical document model for downstream applications
-- Simplified maintenance through separation of configuration and application logic
-- Foundation for semantic search, AI enrichment and labour market intelligence
-
----
-# System Architecture
-
-## Architecture Principles
+### Architecture principles
 
 - Modular Python architecture
 - Separation of ETL stages
 - Separation of configuration, schema and mapping
-- Cloud-first design
-- Extensible canonical data model
-- AI-ready architecture
+- Stable canonical data model
+- Source-specific processing where required
+- Preservation of source provenance
+- Validation before persistence
+- Extensible architecture for future sources
 
+### Component responsibilities
 
-## High-Level Architecture
+#### Data Extraction
 
-```
+The current implementation supports CSV ingestion, with the architecture designed to accommodate APIs and additional file formats in future.
 
-                    Recruitment Data Sources
-                               │
-             ┌─────────────────┴─────────────────┐
-             │                                   │
-          CSV Files                        Future APIs
-             │                                   │
-             └───────────────┬───────────────────┘
-                             ▼
-                      Career Intelligence Platform
-                             │
-      ┌──────────┬───────────┬────────────┬────────────┐
-      ▼          ▼           ▼            ▼
-   Profile     Clean       Map       Validate
-                             │
-                             ▼
-                 Career Intelligence Document
-                             │
-                             ▼
-                         MongoDB
-                             │
-                ┌────────────┴────────────┐
-                ▼                         ▼
-           Analytics             AI Applications
-```
-
----
-
-
-## Component Responsibilities
-
-### Data Extraction
-
-Responsible for loading recruitment datasets from external sources. The current implementation supports CSV ingestion, with the architecture designed to accommodate APIs and additional file formats in future.
-
----
-
-### Data Profiling
+#### Data Profiling
 
 Generates summary statistics describing the incoming dataset, including missing values, duplicate records and data types. Profiling informs the cleaning process and provides transparency over data quality.
 
----
+#### Data Cleaning
 
-### Data Cleaning
+Applies configurable data-quality rules including duplicate removal, date conversion, column standardisation and salary normalisation. Cleaning behaviour is controlled through configuration to simplify future extension.
 
-Applies configurable data quality rules including duplicate removal, date conversion, column standardisation and salary normalisation. Cleaning behaviour is controlled through configuration to simplify future extension.
-
----
-
-### Canonical Mapping
+#### Canonical Mapping
 
 Transforms heterogeneous recruitment datasets into a common Career Intelligence document model. This abstraction layer separates source-specific schemas from downstream analytics.
 
----
-
-### Validation
+#### Validation
 
 Verifies that each generated Career Intelligence document conforms to the canonical schema before persistence. Validation provides early detection of mapping errors and incomplete data.
 
----
+#### MongoDB Repository
 
-### MongoDB Repository
+Stores validated Career Intelligence documents using a hierarchical document structure that represents recruitment data while remaining independent of the original source schema.
 
-Stores validated Career Intelligence documents using a hierarchical document structure that naturally represents recruitment data while remaining independent of the original source schema.
+### Technology Stack
 
----
+| Component | Technology | Current role |
+|---|---|---|
+| Python | Python | ETL and orchestration |
+| MongoDB | MongoDB | Document storage |
+| Pandas | Pandas | Data transformation and profiling |
+| Jupyter | Jupyter | Analytical investigation |
+| GitHub | Git/GitHub | Version control and documentation |
+| Amazon S3 | AWS S3 | Planned data-lake integration |
+| Databricks | Apache Spark | Planned scalable processing |
+| EC2 | AWS EC2 | Optional/future hosting |
 
-### Future AI Services
-
-Future development will introduce AI-assisted schema mapping, semantic search, skills extraction and career recommendation services built on top of the canonical document model.
-
-
-### Amazon S3
-
-...
-
-### Databricks
-
-...
-
-### MongoDB
-
-...
-
-### EC2
-
-...
-
-### SQL Server (Optional)
-
-...
-
----
-
-## Technology Stack
-
-| Component | Technology |
-|-----------|------------|
-| Python | ETL & Orchestration |
-| Amazon S3 | Data Lake |
-| Databricks | Processing |
-| MongoDB | Document Store |
-| EC2 | Hosting |
-| SQL | Analytics |
-| GitHub | Version Control |
-
----
-
-## Canonical Data Model
-
-The Career Intelligence Platform stores every recruitment record using a common document schema regardless of the original data source.
-
-The current canonical document consists of the following logical sections:
-
-- **job** – Vacancy information, identifiers and descriptions
-- **organisation** – Employer and organisational information
-- **employment** – Contract, salary and working pattern
-- **location** – Geographic information
-- **dates** – Publication and closing dates
-- **metadata** – Dataset provenance and ingestion information
-- **ai** – Reserved for future AI enrichment including skills, embeddings and semantic metadata
-
-This stable schema allows downstream analytics and AI applications to remain independent of individual recruitment providers.
-
----
-
-# Project Structure
+### Project Structure
 
 ```text
 Career-Intelligence-Platform/
@@ -277,313 +515,97 @@ Career-Intelligence-Platform/
 ├── .gitignore
 ├── app.py
 ├── README.md
-├── README_old.md
 ├── requirements.txt
-├── notes.md
 ├── assets/
-│   └── schema.md
 ├── data/
 │   ├── exports/
 │   ├── processed/
 │   └── raw/
-│       ├── jobs_raw.csv
-│       └── nhs-jobs-metadata.json
 ├── docs/
 ├── images/
-├── logs/
 ├── notebooks/
 ├── src/
 │   ├── analytics/
 │   ├── clean/
-│   │   └── clean.py
-│   ├── config.py
 │   ├── database/
-│   │   ├── connection.py
-│   │   ├── query.py
-│   │   └── repository.py
 │   ├── extract/
-│   │   └── csv_loader.py
 │   ├── load/
 │   ├── models/
-│   │   └── career_document.py
 │   ├── profile/
-│   │   └── reports.py
 │   ├── transform/
-│   │   └── mapper.py
 │   ├── utils/
 │   └── validation/
-│       └── validator.py
-├── tests/
-│   ├── test_connection.py
-│   ├── test_repository.py
-│   └── test_repository_2.py
-└── .venv/
+└── tests/
 ```
 
----
+### Installation & Setup
 
-# Data Model
-
-### Document Schemas
-
-**MongoDB Collection structure**
-
-```
-jobs
-│
-├── job
-│   ├── title
-│   ├── reference
-│   ├── description
-│   └── specialty
-│
-├── organisation
-│   ├── name
-│   ├── department
-│   └── postcode
-│
-├── employment
-│   ├── type
-│   ├── working_pattern
-│   ├── salary
-│   └── pay_band
-│
-├── location
-│   ├── town
-│   ├── postcode
-│   ├── latitude
-│   └── longitude
-│
-├── dates
-│
-├── metadata
-│
-└── ai
-```
-
----
-
-## AI Roadmap
-
-- AI-assisted schema detection
-- Intelligent field mapping
-- Automatic mapping configuration
-- Skill extraction
-- Semantic search
-- Career recommendation engine
-
----
-
-# Installation & Setup
-
-## Installation & Setup
-
-1. Clone the repository
-
-2. Create a Python virtual environment
-
-3. Install project dependencies
+1. Clone the repository.
+2. Create a Python virtual environment.
+3. Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Configure environment variables
+4. Configure environment variables:
 
-Create a `.env` file containing:
-
-```
+```text
 MONGO_URI=
 MONGO_DATABASE=
 MONGO_COLLECTION=
 ```
 
-5. Place the NHS Jobs dataset into:
+5. Place the NHS Jobs dataset in:
 
-```
+```text
 data/raw/
 ```
-(repeat for similar datasets)
 
-6. Run the application
+6. Run:
 
 ```bash
 python app.py
 ```
 
-The platform will profile, clean, transform, validate and store Career Intelligence documents within MongoDB.
+The platform will profile, clean, transform, validate and store Career Intelligence documents in MongoDB.
 
 ---
 
-## Project Roadmap
+## Development Notes
 
-The Career Intelligence Platform is being developed iteratively, with each phase adding new capabilities while building upon a stable canonical data model.
+### Salary outliers
 
-```
-Phase 1 — Prove the engineering pipeline
-        NHS Jobs
-
-             ↓
-
-Phase 2 — Prove analytical value
-        What can we learn?
-        What data-quality problems exist?
-
-             ↓
-
-Phase 3 — Prove generalisation
-        Can the same architecture
-        ingest fundamentally different sources?
-
-             ↓
-
-Phase 4 — Reduce manual integration
-        AI-assisted mapping/enrichment
-```
-
-### Phase 1 – Core Data Platform ✅
-
-The initial implementation demonstrates the complete ETL pipeline using the NHS Jobs dataset.
-
-**Completed**
-
-- CSV data ingestion
-- Dataset profiling and reporting
-- Configurable data cleaning
-- Canonical document mapping
-- Document validation
-- MongoDB document storage
-- Repository (CRUD) layer
-- Initial analytical query framework
-
----
-
-### Phase 2 – Analytics & Business Intelligence *(Current)*
-
-Transform stored recruitment data into actionable labour market insights.
-
-**Objectives**
-
-- Complete analytical query library
-- Interactive data visualisation
-- Employment trend analysis
-- Salary analysis
-- Geographic vacancy analysis
-- Employer and organisation reporting
-- Jupyter notebook demonstrations
-- Optional EC2-hosted MongoDB deployment
-
-Extract
-
-↓
-
-Clean
-
-↓
-
-Canonical Mapping
-
-↓
-
-Validation
-
-↓
-
-MongoDB
-
-↓
-
-Repository
-
-↓
-
-Analytics
-
-↓
-
-Engineering Visualisations
-
----
-
-### Phase 3 – Platform Expansion
-
-Extend the platform beyond a single recruitment provider.
-
-**Objectives**
-
-- Multiple recruitment datasets
-- API-based data ingestion
-- Configuration-driven schema mappings
-- Automatic field alias recognition
-- Expanded metadata model
-- Databricks integration
-- Cloud-based processing pipeline
-
----
-
-### Phase 4 – AI & Intelligent Data Integration
-
-Introduce AI to reduce manual configuration and provide richer analytical capabilities.
-
-**Objectives**
-
-- AI-assisted schema discovery
-- Intelligent field mapping
-- Skills extraction using Large Language Models
-- Duplicate vacancy detection across providers
-- Semantic search using vector embeddings
-- Career similarity recommendations
-- Labour market intelligence services
-
----
-# Development Notes #
-
-## Notes on salary outliers from NHS dataset ##
-
-Known source data issues
-
-The NHS Jobs dataset contains a small number of anomalous salary values (for example multi-million pound maximum salaries). These values are preserved in the canonical dataset and identified by the platform's data quality analytics rather than being automatically corrected.
-
-Data Quality Investigation
-
-Several salary outliers appear to be caused by
-incorrect formatting in the source dataset.
-In addition over 3000 records were missing salaries.
+The NHS Jobs dataset contains a small number of anomalous salary values. These values are preserved in the canonical dataset and identified by data-quality analytics rather than automatically corrected.
 
 Examples:
 
+```text
 4908600 -> likely 49,086.00
 8195110 -> likely 81,951.10
 7791000 -> likely 77,910.00
+```
 
 The original values are preserved in MongoDB.
-No automatic correction is currently applied.
 
-## Engineering Findings 
+### Engineering Findings
 
-*NHS Data Set*
-
-- Salary outliers were detected in the source NHS dataset and isolated through data quality queries.
+- Salary outliers were detected in the source NHS dataset and isolated through data-quality queries.
 - Employer analysis identified central advertising organisations, suggesting employer normalisation will improve future analytics.
 - Location data contains a mixture of towns, hospitals and NHS sites, motivating a future canonical location model.
 - Contract descriptions are semantically similar but inconsistently formatted, supporting a future enrichment layer.
 
-
 ---
 
-### Long-Term Vision
+## Long-Term Vision
 
-The long-term objective is to create a reusable Career Intelligence Platform capable of integrating heterogeneous recruitment data from multiple providers into a common analytical model.
+The long-term objective is to create a reusable Career Intelligence Platform capable of integrating heterogeneous recruitment and workforce data into a common analytical model.
 
 Rather than developing bespoke ETL pipelines for individual datasets, new recruitment sources should be onboarded primarily through configuration, schema mapping and AI-assisted discovery while preserving a stable canonical document structure.
 
 This architecture enables analytics, reporting, semantic search and future AI applications to operate independently of the underlying recruitment provider.
 
-## Future Improvements
-
-The current implementation demonstrates the core architecture using the NHS Jobs dataset. Future development will focus on extending the platform into a generic recruitment data integration framework.
-
-Planned enhancements include:
+### Future Improvements
 
 - Support for additional recruitment providers
 - API-based ingestion
@@ -596,10 +618,15 @@ Planned enhancements include:
 - Databricks processing pipeline
 - Automated cloud deployment
 - Interactive analytics dashboard
+
 ---
 
 ## Conclusion
 
-The Career Intelligence Platform demonstrates how a reusable cloud-native data engineering architecture can standardise heterogeneous recruitment datasets into a common Career Intelligence model.
+The Career Intelligence Platform uses a real healthcare recruitment dataset to demonstrate a reusable data engineering approach to a wider problem:
 
-By separating configuration, schema and mapping logic, the platform can be adapted to new recruitment sources with minimal code changes while providing a scalable foundation for analytics and AI-powered career intelligence.
+> **How can disparate, incomplete and inconsistent data be engineered into a standardised and robust resource for analytics?**
+
+The current implementation demonstrates the core process using NHS Jobs.
+
+The longer-term objective is to apply the same principles to additional recruitment and workforce sources, while preserving source provenance, controlling data quality and progressively reducing the manual effort required to integrate new datasets.
