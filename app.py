@@ -5,7 +5,7 @@ from src.config import RAW_DATA
 from src.extract.csv_loader import load_data
 from src.profile.reports import generate_profile
 from clean.clean import clean_data
-from src.transform.mapper import build_documents
+from transform.mapper_nhs import build_documents
 from src.validation.validator import (
     validate_documents,
     get_valid_documents,
