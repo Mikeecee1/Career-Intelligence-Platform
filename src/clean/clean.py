@@ -1,4 +1,4 @@
-"""Clean the raw reed dataset."""
+"""Apply configurable cleaning operations to a raw jobs dataset."""
 
 import pandas as pd
 
@@ -7,7 +7,7 @@ from src.config import CLEANING_OPTIONS
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Clean the NHS jobs dataset.
+    Clean the jobs dataset.
 
     Args:
         df: Raw pandas DataFrame.

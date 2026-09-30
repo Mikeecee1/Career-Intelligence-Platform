@@ -4,7 +4,7 @@ from src.config import RAW_DATA
 
 from src.extract.csv_loader import load_data
 from src.profile.reports import generate_profile
-from src.clean.nhs_cleaner import clean_data
+from clean.clean import clean_data
 from src.transform.mapper import build_documents
 from src.validation.validator import (
     validate_documents,
