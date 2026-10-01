@@ -93,9 +93,13 @@ The objective is not to claim that this represents the complete healthcare recru
 <br><br><br>
 
 
-> **[Presentation visual: raw source record → canonical document]**
 
-
+<table>
+  <tr>
+    <td><img src="images/Screen1.png" alt="Screenshot of Program run" width="100%"></td>
+    <td><img src="images/Screen2.png" alt="Screenshot of program run" width="100%"></td>
+  </tr>
+</table>
 ---
 
 ## 4. The Canonical Data Model
